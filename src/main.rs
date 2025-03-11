@@ -49,24 +49,594 @@ fn process_chunk(chunk: &[u8; 64], a0: &mut u32, b0: &mut u32, c0: &mut u32, d0:
 
     let chunk: &[u32; 16] = unsafe { std::mem::transmute(chunk) };
 
-    for round in 0..64 {
-        let (mut F, g) = match round {
-            0..=15 => ((B & C) | (!B & D), round),
-            16..=31 => ((D & B) | (!D & C), (5 * round + 1) % 16),
-            32..=47 => (B ^ C ^ D, (3 * round + 5) % 16),
-            48..=63 => (C ^ (B | !D), (7 * round) % 16),
-            _ => unreachable!(),
+    // Define a macro for the MD5 operation
+    macro_rules! md5_op {
+        ($a:expr, $b:expr, $c:expr, $d:expr, $f:expr, $g:expr, $k:expr, $s:expr, $chunk:expr) => {
+            let mut F = $f;
+            F = F.wrapping_add($a).wrapping_add($k).wrapping_add($chunk[$g]);
+            $a = $d;
+            $d = $c;
+            $c = $b;
+            $b = $b.wrapping_add(F.rotate_left($s));
         };
-
-        F = F
-            .wrapping_add(A)
-            .wrapping_add(K[round])
-            .wrapping_add(chunk[g]);
-        A = D;
-        D = C;
-        C = B;
-        B = B.wrapping_add(F.rotate_left(SHIFTS[round]))
     }
+
+    // Define helper macros for the F functions
+    macro_rules! f_func1 {
+        ($b:expr, $c:expr, $d:expr) => {
+            ($b & $c) | (!$b & $d)
+        };
+    }
+
+    macro_rules! f_func2 {
+        ($b:expr, $c:expr, $d:expr) => {
+            ($d & $b) | (!$d & $c)
+        };
+    }
+
+    macro_rules! f_func3 {
+        ($b:expr, $c:expr, $d:expr) => {
+            $b ^ $c ^ $d
+        };
+    }
+
+    macro_rules! f_func4 {
+        ($b:expr, $c:expr, $d:expr) => {
+            $c ^ ($b | !$d)
+        };
+    }
+
+    // First round (0-15)
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 0, K[0], SHIFTS[0], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 1, K[1], SHIFTS[1], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 2, K[2], SHIFTS[2], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 3, K[3], SHIFTS[3], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 4, K[4], SHIFTS[4], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 5, K[5], SHIFTS[5], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 6, K[6], SHIFTS[6], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 7, K[7], SHIFTS[7], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 8, K[8], SHIFTS[8], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 9, K[9], SHIFTS[9], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 10, K[10], SHIFTS[10], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 11, K[11], SHIFTS[11], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 12, K[12], SHIFTS[12], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 13, K[13], SHIFTS[13], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 14, K[14], SHIFTS[14], chunk);
+    md5_op!(A, B, C, D, f_func1!(B, C, D), 15, K[15], SHIFTS[15], chunk);
+
+    // Second round (16-31)
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 16 + 1) % 16,
+        K[16],
+        SHIFTS[16],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 17 + 1) % 16,
+        K[17],
+        SHIFTS[17],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 18 + 1) % 16,
+        K[18],
+        SHIFTS[18],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 19 + 1) % 16,
+        K[19],
+        SHIFTS[19],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 20 + 1) % 16,
+        K[20],
+        SHIFTS[20],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 21 + 1) % 16,
+        K[21],
+        SHIFTS[21],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 22 + 1) % 16,
+        K[22],
+        SHIFTS[22],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 23 + 1) % 16,
+        K[23],
+        SHIFTS[23],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 24 + 1) % 16,
+        K[24],
+        SHIFTS[24],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 25 + 1) % 16,
+        K[25],
+        SHIFTS[25],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 26 + 1) % 16,
+        K[26],
+        SHIFTS[26],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 27 + 1) % 16,
+        K[27],
+        SHIFTS[27],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 28 + 1) % 16,
+        K[28],
+        SHIFTS[28],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 29 + 1) % 16,
+        K[29],
+        SHIFTS[29],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 30 + 1) % 16,
+        K[30],
+        SHIFTS[30],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func2!(B, C, D),
+        (5 * 31 + 1) % 16,
+        K[31],
+        SHIFTS[31],
+        chunk
+    );
+
+    // Third round (32-47)
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 32 + 5) % 16,
+        K[32],
+        SHIFTS[32],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 33 + 5) % 16,
+        K[33],
+        SHIFTS[33],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 34 + 5) % 16,
+        K[34],
+        SHIFTS[34],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 35 + 5) % 16,
+        K[35],
+        SHIFTS[35],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 36 + 5) % 16,
+        K[36],
+        SHIFTS[36],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 37 + 5) % 16,
+        K[37],
+        SHIFTS[37],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 38 + 5) % 16,
+        K[38],
+        SHIFTS[38],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 39 + 5) % 16,
+        K[39],
+        SHIFTS[39],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 40 + 5) % 16,
+        K[40],
+        SHIFTS[40],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 41 + 5) % 16,
+        K[41],
+        SHIFTS[41],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 42 + 5) % 16,
+        K[42],
+        SHIFTS[42],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 43 + 5) % 16,
+        K[43],
+        SHIFTS[43],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 44 + 5) % 16,
+        K[44],
+        SHIFTS[44],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 45 + 5) % 16,
+        K[45],
+        SHIFTS[45],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 46 + 5) % 16,
+        K[46],
+        SHIFTS[46],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func3!(B, C, D),
+        (3 * 47 + 5) % 16,
+        K[47],
+        SHIFTS[47],
+        chunk
+    );
+
+    // Fourth round (48-63)
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 48) % 16,
+        K[48],
+        SHIFTS[48],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 49) % 16,
+        K[49],
+        SHIFTS[49],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 50) % 16,
+        K[50],
+        SHIFTS[50],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 51) % 16,
+        K[51],
+        SHIFTS[51],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 52) % 16,
+        K[52],
+        SHIFTS[52],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 53) % 16,
+        K[53],
+        SHIFTS[53],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 54) % 16,
+        K[54],
+        SHIFTS[54],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 55) % 16,
+        K[55],
+        SHIFTS[55],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 56) % 16,
+        K[56],
+        SHIFTS[56],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 57) % 16,
+        K[57],
+        SHIFTS[57],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 58) % 16,
+        K[58],
+        SHIFTS[58],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 59) % 16,
+        K[59],
+        SHIFTS[59],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 60) % 16,
+        K[60],
+        SHIFTS[60],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 61) % 16,
+        K[61],
+        SHIFTS[61],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 62) % 16,
+        K[62],
+        SHIFTS[62],
+        chunk
+    );
+    md5_op!(
+        A,
+        B,
+        C,
+        D,
+        f_func4!(B, C, D),
+        (7 * 63) % 16,
+        K[63],
+        SHIFTS[63],
+        chunk
+    );
 
     *a0 = a0.wrapping_add(A);
     *b0 = b0.wrapping_add(B);
@@ -121,7 +691,8 @@ where
 
 fn main() -> anyhow::Result<()> {
     let options = Options::parse();
-    let mut reader = std::io::BufReader::new(std::fs::File::open(&options.path)?);
+    let mut reader =
+        std::io::BufReader::with_capacity(4096 * 8, std::fs::File::open(&options.path)?);
     println!(
         "{hash}  {fname}",
         hash = comptue_md5(&mut reader).to_string(),

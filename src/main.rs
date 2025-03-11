@@ -644,7 +644,7 @@ fn process_chunk(chunk: &[u8; 64], a0: &mut u32, b0: &mut u32, c0: &mut u32, d0:
     *d0 = d0.wrapping_add(D);
 }
 
-fn comptue_md5<T>(mut reader: T) -> Digest
+fn compute_md5<T>(mut reader: T) -> Digest
 where
     T: std::io::Read,
 {
@@ -695,7 +695,7 @@ fn main() -> anyhow::Result<()> {
         std::io::BufReader::with_capacity(4096 * 8, std::fs::File::open(&options.path)?);
     println!(
         "{hash}  {fname}",
-        hash = comptue_md5(&mut reader).to_string(),
+        hash = compute_md5(&mut reader).to_string(),
         fname = options.path.to_str().unwrap()
     );
     Ok(())
@@ -708,7 +708,7 @@ mod tests {
     #[test]
     fn empty() {
         assert_eq!(
-            comptue_md5(std::io::Cursor::new("")).to_string(),
+            compute_md5(std::io::Cursor::new("")).to_string(),
             "d41d8cd98f00b204e9800998ecf8427e".to_string()
         )
     }
@@ -716,7 +716,7 @@ mod tests {
     #[test]
     fn brown_fox() {
         assert_eq!(
-            comptue_md5(std::io::Cursor::new(
+            compute_md5(std::io::Cursor::new(
                 "The quick brown fox jumps over the lazy dog"
             ))
             .to_string(),

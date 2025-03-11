@@ -696,7 +696,10 @@ fn main() -> anyhow::Result<()> {
     println!(
         "{hash}  {fname}",
         hash = compute_md5(&mut reader).to_string(),
-        fname = options.path.to_str().unwrap()
+        fname = options
+            .path
+            .to_str()
+            .ok_or(anyhow::anyhow!("The file path is not a valid UTF8 string"))?
     );
     Ok(())
 }
